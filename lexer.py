@@ -20,18 +20,45 @@ class Lexer:
       return self.source[self.curr + n]
 
   def match(self, expected):
+      if self.curr >= len(self.source):
+          return False
       if self.source[self.curr] != expected:
           return False
       self.curr = self.curr + 1
       return True
 
   def add_token(self, token_type):
-      self.tokens.append(Token(token_type, self.source[self.start:self.curr]))
+      self.tokens.append(Token(token_type, self.source[self.start:self.curr], self.line))
 
   def tokenize(self):
     while self.curr < len(self.source):
       self.start = self.curr 
       ch = self.advance()
+      if ch == '\n': self.line = self.line + 1
+      elif ch == ' ': pass
+      elif ch == '\r': pass
+      elif ch == '\t': pass
+      elif ch == '#': 
+          while self.peek() != '\n':
+              self.advance()
       if ch == '+': self.add_token(TOK_PLUS)
-      if ch == '-': self.add_token(TOK_MINUS)
+      elif ch == '-': self.add_token(TOK_MINUS)
+      elif ch == '*': self.add_token(TOK_STAR)
+      elif ch == '(': self.add_token(TOK_LPAREN)
+      elif ch == ')': self.add_token(TOK_RPAREN)
+      elif ch == '[': self.add_token(TOK_LSQUAR)
+      elif ch == ']': self.add_token(TOK_RSQUAR)
+      elif ch == '{': self.add_token(TOK_LCURLY)
+      elif ch == '}': self.add_token(TOK_RCURLY)
+      elif ch == '.': self.add_token(TOK_DOT)
+      elif ch == ',': self.add_token(TOK_COMMA)
+      elif ch == '^': self.add_token(TOK_CARET)
+      elif ch == '/': self.add_token(TOK_SLASH)
+      elif ch == ';': self.add_token(TOK_SEMICOLON)
+      elif ch == '?': self.add_token(TOK_QUESTION)
+      elif ch == '%': self.add_token(TOK_MOD)
+      elif ch == '=':
+          if self.match('='):
+              self.add_token(TOK_EQ)
+    #TODO: match on tilde, <, <=, >=, :, :=
     return self.tokens
