@@ -70,4 +70,7 @@ class Lexer:
               self.add_token(TOK_LE if self.match('=') else TOK_LT)
       elif ch == ':':
               self.add_token(TOK_ASSIGN if self.match('=') else TOK_COLON)
+    #TODO: Check if it is a digit, then read if either int or float 
+    #TODO: Check if it is single quote, then read a string token
+    #TODO: Check if it is an alpha character or _, then we must handle an identifier (If nothing else has hit, it is an identifier)
     return self.tokens
