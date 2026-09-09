@@ -17,6 +17,8 @@ class Lexer:
       return self.source[self.curr]
 
   def lookahead(self, n=1):
+      if self.curr >= len(self.source):
+        return '\0'
       return self.source[self.curr + n]
 
   def match(self, expected):
@@ -24,10 +26,6 @@ class Lexer:
           return False
       if self.source[self.curr] != expected:
           return False
-      # Matching on whitespace means we are checking if a symbol is by itself 
-      # meaning we don't want to add the space to the lexeme
-      if expected == ' ':
-          return True
       self.curr = self.curr + 1
       return True
 
@@ -65,21 +63,11 @@ class Lexer:
           if self.match('='):
               self.add_token(TOK_EQ)
       elif ch == '~':
-          if self.match('='):
-              self.add_token(TOK_NE)
+              self.add_token(TOK_NE if self.match('=') else TOK_NOT)
       elif ch == '>':
-          if self.match('='):
-              self.add_token(TOK_GE)
-          elif self.match(' '):
-              self.add_token(TOK_GT)
+              self.add_token(TOK_GE if self.match('=') else TOK_GT)
       elif ch == '<':
-          if self.match('='):
-              self.add_token(TOK_LE)
-          elif self.match(' '):
-              self.add_token(TOK_LT)
+              self.add_token(TOK_LE if self.match('=') else TOK_LT)
       elif ch == ':':
-          if self.match('='):
-              self.add_token(TOK_ASSIGN)
-          elif self.match(' '):
-              self.add_token(TOK_COLON)
+              self.add_token(TOK_ASSIGN if self.match('=') else TOK_COLON)
     return self.tokens
