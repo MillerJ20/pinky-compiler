@@ -46,11 +46,15 @@ class Lexer:
       self.add_token(TOK_INTEGER)
              
   def handle_identifier(self):
-    while self.curr <= len(self.source):
-      if self.peek().isalnum() == False and self.peek() != '_':
-        break
+    while self.peek().isalnum() or self.peek() == '_':
       self.advance()
-    self.add_token(TOK_IDENTIFIER)
+    curr_identifier = self.source[self.start:self.curr]
+    keyword_type = keywords.get(curr_identifier)
+
+    if keyword_type == None:
+      self.add_token(TOK_IDENTIFIER)
+    else:
+      self.add_token(keyword_type)
 
   def handle_string(self, string_start):
     while self.curr <= len(self.source):
@@ -67,6 +71,7 @@ class Lexer:
       elif ch == ' ': pass
       elif ch == '\r': pass
       elif ch == '\t': pass
+      #TODO: Pinky comments are --, not hash
       elif ch == '#':
         while self.peek() != '\n':
           self.advance()
