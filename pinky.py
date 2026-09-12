@@ -13,5 +13,5 @@ if __name__ == '__main__':
 
     print("LEXER: ")
     tokens = Lexer(source).tokenize()
-    
+
     for tok in tokens: print(tok)

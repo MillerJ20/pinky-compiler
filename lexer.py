@@ -14,35 +14,62 @@ class Lexer:
     return ch
   
   def peek(self):
-      return self.source[self.curr]
+    if self.curr >= len(self.source):
+      return '\0'
+    return self.source[self.curr]
 
   def lookahead(self, n=1):
-      if self.curr >= len(self.source):
-        return '\0'
-      return self.source[self.curr + n]
+    if self.curr >= len(self.source):
+      return '\0'
+    return self.source[self.curr + n]
 
   def match(self, expected):
-      if self.curr >= len(self.source):
-          return False
-      if self.source[self.curr] != expected:
-          return False
-      self.curr = self.curr + 1
-      return True
+    if self.curr >= len(self.source):
+      return False
+    if self.source[self.curr] != expected:
+      return False
+    self.curr = self.curr + 1
+    return True
 
   def add_token(self, token_type):
-      self.tokens.append(Token(token_type, self.source[self.start:self.curr], self.line))
+    self.tokens.append(Token(token_type, self.source[self.start:self.curr], self.line))
+
+  def handle_number(self):
+    while self.peek().isdecimal():
+      self.advance()
+    if self.peek() == '.' and self.lookahead().isdigit():
+        self.advance()
+        while self.peek().isdecimal():
+          self.advance()
+        self.add_token(TOK_FLOAT)
+    else:
+      self.add_token(TOK_INTEGER)
+             
+  def handle_identifier(self):
+    while self.curr <= len(self.source):
+      if self.peek().isalnum() == False and self.peek() != '_':
+        break
+      self.advance()
+    self.add_token(TOK_IDENTIFIER)
+
+  def handle_string(self, string_start):
+    while self.curr <= len(self.source):
+      if self.match(string_start):
+        break
+      self.advance()
+    self.add_token(TOK_STRING)
 
   def tokenize(self):
     while self.curr < len(self.source):
-      self.start = self.curr 
+      self.start = self.curr
       ch = self.advance()
       if ch == '\n': self.line = self.line + 1
       elif ch == ' ': pass
       elif ch == '\r': pass
       elif ch == '\t': pass
-      elif ch == '#': 
-          while self.peek() != '\n':
-              self.advance()
+      elif ch == '#':
+        while self.peek() != '\n':
+          self.advance()
       if ch == '+': self.add_token(TOK_PLUS)
       elif ch == '-': self.add_token(TOK_MINUS)
       elif ch == '*': self.add_token(TOK_STAR)
@@ -60,42 +87,20 @@ class Lexer:
       elif ch == '?': self.add_token(TOK_QUESTION)
       elif ch == '%': self.add_token(TOK_MOD)
       elif ch == '=':
-          if self.match('='):
-              self.add_token(TOK_EQ)
+        if self.match('='):
+          self.add_token(TOK_EQ)
       elif ch == '~':
-              self.add_token(TOK_NE if self.match('=') else TOK_NOT)
+        self.add_token(TOK_NE if self.match('=') else TOK_NOT)
       elif ch == '>':
-              self.add_token(TOK_GE if self.match('=') else TOK_GT)
+        self.add_token(TOK_GE if self.match('=') else TOK_GT)
       elif ch == '<':
-              self.add_token(TOK_LE if self.match('=') else TOK_LT)
+        self.add_token(TOK_LE if self.match('=') else TOK_LT)
       elif ch == ':':
-              self.add_token(TOK_ASSIGN if self.match('=') else TOK_COLON)
+        self.add_token(TOK_ASSIGN if self.match('=') else TOK_COLON)
       elif ch.isdecimal():
-          while self.peek().isdecimal():
-              self.advance()
-          if self.peek() == '.' and self.lookahead().isdigit():
-              self.advance()
-              while self.peek().isdecimal():
-                  self.advance()
-              self.add_token(TOK_FLOAT)
-          else:
-              self.add_token(TOK_INTEGER)
-      elif ch == '\'':
-          while self.curr <= len(self.source):
-              if self.match('\''):
-                  break
-              self.advance()
-          self.add_token(TOK_STRING)
-      elif ch == '\"':
-          while self.curr <= len(self.source):
-              if self.match('\"'):
-                  break
-              self.advance()
-          self.add_token(TOK_STRING)
+        self.handle_number()
+      elif ch == '\'' or ch == '/"':
+        self.handle_string(ch)
       elif ch.isalpha() or ch == '_':
-          while self.curr <= len(self.source):
-              if self.peek().isalpha() == False and self.peek() != '_':
-                  break
-              self.advance()
-          self.add_token(TOK_IDENTIFIER)
+        self.handle_identifier()
     return self.tokens

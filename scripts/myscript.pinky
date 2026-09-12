@@ -1,8 +1,9 @@
-12  1234 12.34 12.  34.5869
+pi := 3.141592
 
-'This is a string'
-"This is a double string"
+x := 8.23
 
-var test := 12
-
-var _underscore_ := 12
+if x >= 0 then
+    println('x is positive')
+else
+    println('x is negative')
+end
