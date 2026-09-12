@@ -1,1 +1,8 @@
-: := < <=   < < <=
+12  1234 12.34 12.  34.5869
+
+'This is a string'
+"This is a double string"
+
+var test := 12
+
+var _underscore_ := 12

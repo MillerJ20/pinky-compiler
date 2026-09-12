@@ -70,7 +70,32 @@ class Lexer:
               self.add_token(TOK_LE if self.match('=') else TOK_LT)
       elif ch == ':':
               self.add_token(TOK_ASSIGN if self.match('=') else TOK_COLON)
-    #TODO: Check if it is a digit, then read if either int or float 
-    #TODO: Check if it is single quote, then read a string token
-    #TODO: Check if it is an alpha character or _, then we must handle an identifier (If nothing else has hit, it is an identifier)
+      elif ch.isdecimal():
+          while self.peek().isdecimal():
+              self.advance()
+          if self.peek() == '.' and self.lookahead().isdigit():
+              self.advance()
+              while self.peek().isdecimal():
+                  self.advance()
+              self.add_token(TOK_FLOAT)
+          else:
+              self.add_token(TOK_INTEGER)
+      elif ch == '\'':
+          while self.curr <= len(self.source):
+              if self.match('\''):
+                  break
+              self.advance()
+          self.add_token(TOK_STRING)
+      elif ch == '\"':
+          while self.curr <= len(self.source):
+              if self.match('\"'):
+                  break
+              self.advance()
+          self.add_token(TOK_STRING)
+      elif ch.isalpha() or ch == '_':
+          while self.curr <= len(self.source):
+              if self.peek().isalpha() == False and self.peek() != '_':
+                  break
+              self.advance()
+          self.add_token(TOK_IDENTIFIER)
     return self.tokens
