@@ -71,12 +71,13 @@ class Lexer:
       elif ch == ' ': pass
       elif ch == '\r': pass
       elif ch == '\t': pass
-      #TODO: Pinky comments are --, not hash
-      elif ch == '#':
-        while self.peek() != '\n':
-          self.advance()
       if ch == '+': self.add_token(TOK_PLUS)
-      elif ch == '-': self.add_token(TOK_MINUS)
+      elif ch == '-': 
+        if self.match('-'):
+          while self.peek() != '\n' and not(self.curr >= len(self.source)):
+            self.advance()
+        else:
+          self.add_token(TOK_MINUS)
       elif ch == '*': self.add_token(TOK_STAR)
       elif ch == '(': self.add_token(TOK_LPAREN)
       elif ch == ')': self.add_token(TOK_RPAREN)
@@ -108,4 +109,6 @@ class Lexer:
         self.handle_string(ch)
       elif ch.isalpha() or ch == '_':
         self.handle_identifier()
+      else:
+        raise SyntaxError(f'[Line {self.line}] Error at {ch}: Unexpected character')
     return self.tokens
